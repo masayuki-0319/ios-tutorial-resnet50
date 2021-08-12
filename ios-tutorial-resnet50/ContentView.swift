@@ -30,6 +30,22 @@ struct ContentView: View {
         classificationLabel = classification[0].identifier
     }
     
+    // 画像分類
+    func classifyImage(image: UIImage) -> Void {
+        guard let ciimage = CIImage(image: image) else {
+            fatalError("CIImage に変換失敗しました")
+        }
+        let handler = VNImageRequestHandler(ciImage: ciimage)
+        
+        let classificationRequest = createClassificationRequest()
+        
+        do {
+            try handler.perform([classificationRequest])
+        } catch {
+            fatalError("画像分類に失敗しました")
+        }
+    }
+    
     var body: some View {
         VStack {
             Text(classificationLabel)
@@ -39,6 +55,7 @@ struct ContentView: View {
                 .resizable()
                 .frame(width: 300, height: 200)
             Button(action: {
+                classifyImage(image: UIImage(named: "shiba")!)
             }, label: {
                 Text("この画像は何だろう？")
                     .padding()
