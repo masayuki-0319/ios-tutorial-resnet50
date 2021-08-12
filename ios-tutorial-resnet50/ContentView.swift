@@ -1,9 +1,38 @@
 import SwiftUI
+import CoreML
+import Vision
 
 struct ContentView: View {
+    @State var classificationLabel = ""
+    
+    // 画像識別リクエスト
+    func createClassificationRequest() -> VNCoreMLRequest {
+        do {
+            let configuration = MLModelConfiguration()
+            
+            let model = try VNCoreMLModel(for: Resnet50(configuration: configuration).model)
+            
+            let request = VNCoreMLRequest(model: model, completionHandler: { request, error in performClassification(request: request)})
+            
+            return request
+        } catch {
+            fatalError("model の読み込みに失敗しました")
+        }
+    }
+    
+    // 画像分類
+    func performClassification(request: VNRequest) -> Void {
+        guard let results = request.results else {
+            return
+        }
+        let classification = results as! [VNClassificationObservation]
+        
+        classificationLabel = classification[0].identifier
+    }
+    
     var body: some View {
         VStack {
-            Text("柴犬です")
+            Text(classificationLabel)
                 .padding()
                 .font(.title)
             Image("shiba")
